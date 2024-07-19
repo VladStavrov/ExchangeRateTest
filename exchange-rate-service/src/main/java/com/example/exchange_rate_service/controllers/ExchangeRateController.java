@@ -2,6 +2,8 @@ package com.example.exchange_rate_service.controllers;
 
 import com.example.exchange_rate_service.dto.ExchangeRateDTO;
 import com.example.exchange_rate_service.dto.ExchangeRateResponse;
+import com.example.exchange_rate_service.exeptions.ApiErrorResponse;
+import com.example.exchange_rate_service.exeptions.ErrorResponse;
 import com.example.exchange_rate_service.services.ExchangeRateService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -38,12 +40,18 @@ public class ExchangeRateController {
                             description = "Date for which to fetch exchange rates",
                             schema = @Schema(type = "string", format = "date")
                     )
+            },
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Exchange rates fetched and stored successfully", content = {
+                            @Content(mediaType = "application/json", schema = @Schema(implementation = ExchangeRateResponse.class))
+                    }),
+                    @ApiResponse(responseCode = "400", description = "Some errors", content = {
+                            @Content(mediaType = "application/json", schema = @Schema(implementation = ApiErrorResponse.class))
+                    }),
+                    @ApiResponse(responseCode = "404", description = "Data not found", content = {
+                            @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))
+                    })
             })
-    @ApiResponse(responseCode = "200", description = "Exchange rates fetched and stored successfully", content = {
-            @Content(mediaType = "application/json", schema = @Schema(implementation = ExchangeRateResponse.class))
-    })
-    @ApiResponse(responseCode = "400", description = "Some errors")
-    @ApiResponse(responseCode = "404", description = "Data not found")
     public ResponseEntity<ExchangeRateResponse> fetchAndStoreExchangeRates(
             @RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
         ExchangeRateResponse response = exchangeRateService.fetchAndStoreExchangeRates(date);
@@ -67,11 +75,15 @@ public class ExchangeRateController {
                             description = "Currency code for which to get the exchange rate",
                             schema = @Schema(type = "string")
                     )
+            },
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Exchange rate found", content = {
+                            @Content(mediaType = "application/json", schema = @Schema(implementation = ExchangeRateDTO.class))
+                    }),
+                    @ApiResponse(responseCode = "404", description = "Data not found", content = {
+                            @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))
+                    })
             })
-    @ApiResponse(responseCode = "200", description = "Exchange rate found", content = {
-            @Content(mediaType = "application/json", schema = @Schema(implementation = ExchangeRateDTO.class))
-    })
-    @ApiResponse(responseCode = "404", description = "Exchange rate not found")
     public ResponseEntity<ExchangeRateDTO> getExchangeRateByDateAndCode(
             @RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
             @RequestParam("currencyCode") String currencyCode) {
